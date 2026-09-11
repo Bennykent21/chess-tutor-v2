@@ -86,7 +86,8 @@ enum class RepertoireFilter {
 @Composable
 fun RepertoireScreen(
   onPracticeLineInArena: (startingFen: String, lineTitle: String) -> Unit,
-  onOpenImportModal: () -> Unit
+  onOpenImportModal: () -> Unit,
+  onOpenStudyBoard: (lineId: String) -> Unit = {}
 ) {
   val repertoires by RepertoireRepository.repertoiresFlow.collectAsState()
   var activeFilter by remember { mutableStateOf(RepertoireFilter.ALL) }
@@ -206,8 +207,7 @@ fun RepertoireScreen(
           RepertoireLineCard(
             line = line,
             onStudyClick = {
-              selectedLineId = line.id
-              currentStepIndex = 0
+              onOpenStudyBoard(line.id)
             },
             onSparClick = {
               val firstMoveFen = line.moves.firstOrNull()?.fenBefore ?: Position.STARTING_FEN
