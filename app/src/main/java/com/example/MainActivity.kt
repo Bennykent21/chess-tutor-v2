@@ -42,6 +42,7 @@ import com.example.chess.ui.screens.AssessmentScreen
 import com.example.chess.ui.screens.CoachHomeScreen
 import com.example.chess.ui.screens.CurriculumScreen
 import com.example.chess.ui.screens.RepertoireScreen
+import com.example.chess.ui.screens.StudyBoardScreen
 import com.example.chess.ui.screens.ReviewScreen
 import com.example.chess.ui.screens.TacticsDojoScreen
 import com.example.chess.ui.theme.CanvasBackground
@@ -86,6 +87,7 @@ fun ChessTutorApp() {
   var arenaStartingFen by remember { mutableStateOf(Position.STARTING_FEN) }
   var arenaSelectedLevel by remember { mutableStateOf(TrainingLevel.INTERMEDIATE_1200) }
   var showImportModal by remember { mutableStateOf(false) }
+  var studyLineId by remember { mutableStateOf<String?>(null) }
 
   val activeCurriculumLesson = remember { CurriculumRepository.allLessons.first() }
 
@@ -182,6 +184,25 @@ fun ChessTutorApp() {
             currentDestination = MainNavigationDestination.TABS
           }
         )
+      } else if (studyLineId != null) {
+        val studyLine = RepertoireRepository.getRepertoireById(studyLineId!!)
+        if (studyLine == null) {
+          studyLineId = null
+        } else {
+          StudyBoardScreen(
+            line = studyLine,
+            onBack = { studyLineId = null },
+            onPracticeInArena = { fen, title ->
+              arenaStartingFen = fen
+              arenaSelectedLevel = TrainingLevel.INTERMEDIATE_1200
+              studyLineId = null
+              currentTab = ChessAppTab.ARENA
+              coroutineScope.launch {
+                snackbarHostState.showSnackbar("Study position loaded: $title")
+              }
+            }
+          )
+        }
       } else {
         AnimatedContent(
           targetState = currentTab,
