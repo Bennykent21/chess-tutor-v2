@@ -220,6 +220,34 @@ fun ChessTutorApp() {
               }
             )
 
+            ChessAppTab.TACTICS -> TacticsDojoScreen(
+              userTacticsRating = userProgress?.tacticsRating ?: 1100,
+              puzzlesSolvedCount = userProgress?.puzzlesSolved ?: 0,
+              onPuzzleSolved = { newRating, solvedCount ->
+                coroutineScope.launch {
+                  withContext(Dispatchers.IO) {
+                    dao.upsertUserProgress(
+                      (userProgress ?: UserProgress()).copy(
+                        tacticsRating = newRating,
+                        puzzlesSolved = solvedCount
+                      )
+                    )
+                  }
+                }
+              },
+              onPracticeInArena = { fen, title ->
+                arenaStartingFen = fen
+                arenaSelectedLevel = TrainingLevel.INTERMEDIATE_1200
+                currentTab = ChessAppTab.ARENA
+                coroutineScope.launch {
+                  snackbarHostState.showSnackbar("Tactical Sparring: $title")
+                }
+              },
+              onClose = {
+                currentTab = ChessAppTab.COACH
+              }
+            )
+
             ChessAppTab.LESSONS -> CurriculumScreen(
               onPracticePositionInArena = { fen, lessonTitle ->
                 arenaStartingFen = fen
