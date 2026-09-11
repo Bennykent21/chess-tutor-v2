@@ -291,6 +291,9 @@ fun ChessTutorApp() {
               },
               onOpenImportModal = {
                 showImportModal = true
+              },
+              onOpenStudyBoard = { lineId ->
+                studyLineId = lineId
               }
             )
 
