@@ -46,9 +46,9 @@ import com.example.chess.ui.theme.TextTitle
 enum class ChessAppTab(val label: String, val icon: ImageVector) {
   COACH("TODAY", Icons.Default.School),
   TACTICS("DOJO", Icons.Default.Bolt),
-  LESSONS("LESSONS", Icons.Default.MenuBook),
-  OPENINGS("OPENINGS", Icons.Default.Book),
   ARENA("ARENA", Icons.Default.SportsEsports),
+  LESSONS("LESSONS", Icons.Default.MenuBook),
+  OPENINGS("REPERTOIRE", Icons.Default.Book),
   REVIEW("REVIEW", Icons.Default.AutoGraph)
 }
 
