@@ -20,6 +20,7 @@ import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.SportsEsports
+import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -43,7 +44,8 @@ import com.example.chess.ui.theme.TextMuted
 import com.example.chess.ui.theme.TextTitle
 
 enum class ChessAppTab(val label: String, val icon: ImageVector) {
-  COACH("COACH", Icons.Default.School),
+  COACH("TODAY", Icons.Default.School),
+  TACTICS("DOJO", Icons.Default.Bolt),
   LESSONS("LESSONS", Icons.Default.MenuBook),
   OPENINGS("OPENINGS", Icons.Default.Book),
   ARENA("ARENA", Icons.Default.SportsEsports),
