@@ -157,6 +157,10 @@ fun ReviewScreen(
   var isSyncing by remember { mutableStateOf(false) }
   var syncMessage by remember { mutableStateOf<String?>(null) }
 
+  var selectedMistakeId by remember { mutableStateOf<Long?>(null) }
+  var reviewMode by remember { mutableStateOf(false) }
+
+
   val defaultChapters = remember {
     listOf(
       GameReviewChapter(
