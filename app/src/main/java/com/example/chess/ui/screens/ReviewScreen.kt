@@ -1666,7 +1666,7 @@ fun ReviewScreen(
                   .padding(horizontal = 8.dp, vertical = 4.dp)
               ) {
                 Text(
-                  text = "Stage ${record.repetitionStage}/3",
+                  text = if (record.repetitionStage >= 4) "Mastered" else "Stage ${record.repetitionStage}/4",
                   color = CoachAccentGold,
                   fontSize = 11.sp,
                   fontWeight = FontWeight.Bold
