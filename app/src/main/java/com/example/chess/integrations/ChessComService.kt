@@ -29,7 +29,7 @@ class ChessComService(
 
       getJson(archives.last(), gamesAdapter).games
         .asSequence()
-        .filter { it.timeClass != "chess960" }
+        .filter { it.timeClass != "chess960" && it.pgn?.isNotBlank() == true }
         .sortedByDescending { it.endTime ?: 0L }
         .take(limit)
         .toList()
