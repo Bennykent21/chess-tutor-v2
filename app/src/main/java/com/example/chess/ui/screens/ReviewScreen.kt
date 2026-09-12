@@ -615,7 +615,48 @@ fun ReviewScreen(
               verticalAlignment = Alignment.CenterVertically
             ) {
               Column {
-                Text(
+                if (dueReviewCount > 0) {
+            Box(
+              modifier = Modifier
+                .fillMaxWidth()
+                .liquidGlassPill(shape = RoundedCornerShape(10.dp), isActive = true)
+                .padding(horizontal = 12.dp, vertical = 8.dp)
+            ) {
+              Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+              ) {
+                Column {
+                  Text("REVIEW QUEUE", color = CoachAccentGold, fontSize = 9.sp, fontWeight = FontWeight.Bold)
+                  Text(
+                    dueReviewCount.toString() + " position" + if (dueReviewCount == 1) "" else "s" + " due now",
+                    color = TextTitle,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold
+                  )
+                }
+                Button(
+                  onClick = {
+                    currentSubTab = ReviewSubTab.SPACED_MISTAKES
+                    reviewMode = true
+                    selectedMistakeId = mistakeList.firstOrNull {
+                      it.reviewDueTimestampMs <= System.currentTimeMillis()
+                    }?.id
+                  },
+                  colors = ButtonDefaults.buttonColors(
+                    containerColor = CoachPrimary,
+                    contentColor = Color(0xFF0F1115)
+                  ),
+                  shape = RoundedCornerShape(10.dp)
+                ) {
+                  Text("Start review", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                }
+              }
+            }
+          }
+
+          Text(
                   text = "MOVE ${selectedChapter.moveNumber} INSPECTION",
                   color = TextMuted,
                   fontSize = 10.sp,
