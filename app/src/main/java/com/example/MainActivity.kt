@@ -225,7 +225,10 @@ fun ChessTutorApp() {
               onStartSpacedReview = {
                 currentTab = ChessAppTab.REVIEW
                 coroutineScope.launch {
-                  snackbarHostState.showSnackbar("Loaded Spaced-Repetition Review Queue")
+                  snackbarHostState.showSnackbar(
+                    if (dueMistakes.isEmpty()) "No positions are due for review"
+                    else "Loaded " + dueMistakes.size + " spaced-repetition positions"
+                  )
                 }
               },
               onResumeLesson = {
