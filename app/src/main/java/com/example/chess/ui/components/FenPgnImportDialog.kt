@@ -72,8 +72,6 @@ import com.example.chess.analysis.PgnParser
 import com.example.chess.core.PieceColor
 import com.example.chess.core.Position
 import com.example.chess.network.ChessComClient
-import com.example.chess.integrations.ChessComService
-import com.example.chess.integrations.LichessService
 import com.example.chess.network.ChessComGameItem
 import com.example.chess.network.LichessClient
 import com.example.chess.openings.RepertoireLine
@@ -870,7 +868,7 @@ fun FenPgnImportDialog(
                     lichessError = null
                     lichessSuccessMessage = null
                     coroutineScope.launch {
-                      val res = runCatching { LichessService().fetchStudyPgn(lichessStudyInput) }
+                      val res = LichessClient.fetchStudyPgn(lichessStudyInput)
                       lichessLoading = false
                       res.onSuccess { fetchedPgn ->
                         pgnText = fetchedPgn
@@ -1000,7 +998,7 @@ fun FenPgnImportDialog(
                     chessComLoading = true
                     chessComError = null
                     coroutineScope.launch {
-                      val res = runCatching { ChessComService().fetchRecentGames(chessComUsername) }
+                      val res = ChessComClient.fetchRecentGames(chessComUsername)
                       chessComLoading = false
                       res.onSuccess { games ->
                         chessComGames = games.map { game -> ChessComGameItem(url = game.url ?: "", pgn = game.pgn ?: "", time_class = game.timeClass ?: "game", end_time = game.endTime ?: 0L, white = game.white?.let { ChessComGameItem.Player(it.username ?: "?", it.rating ?: 0, it.result ?: "") }, black = game.black?.let { ChessComGameItem.Player(it.username ?: "?", it.rating ?: 0, it.result ?: "") }) }
