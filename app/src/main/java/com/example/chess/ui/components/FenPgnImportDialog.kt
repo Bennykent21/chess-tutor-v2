@@ -72,6 +72,8 @@ import com.example.chess.analysis.PgnParser
 import com.example.chess.core.PieceColor
 import com.example.chess.core.Position
 import com.example.chess.network.ChessComClient
+import com.example.chess.integrations.ChessComService
+import com.example.chess.integrations.LichessService
 import com.example.chess.network.ChessComGameItem
 import com.example.chess.network.LichessClient
 import com.example.chess.openings.RepertoireLine
@@ -868,7 +870,7 @@ fun FenPgnImportDialog(
                     lichessError = null
                     lichessSuccessMessage = null
                     coroutineScope.launch {
-                      val res = LichessClient.fetchStudyPgn(lichessStudyInput)
+                      val res = runCatching { LichessService().fetchStudyPgn(lichessStudyInput) }
                       lichessLoading = false
                       res.onSuccess { fetchedPgn ->
                         pgnText = fetchedPgn
