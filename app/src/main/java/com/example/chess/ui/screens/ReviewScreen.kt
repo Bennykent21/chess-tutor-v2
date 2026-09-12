@@ -799,6 +799,38 @@ fun ReviewScreen(
           }
         }
       }
+    } else if (currentSubTab == ReviewSubTab.SPACED_MISTAKES) {
+      item {
+        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+          Text(text = "DUE NOW · " + dueReviewCount, color = CoachAccentGold, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+          if (dueMistakes.isEmpty()) {
+            Box(modifier = Modifier.fillMaxWidth().liquidGlassCard(shape = RoundedCornerShape(16.dp)).padding(18.dp)) {
+              Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text("Review queue is clear", color = TextTitle, fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                Text("No mistake positions are due right now.", color = TextBody, fontSize = 12.sp)
+              }
+            }
+          } else {
+            dueMistakes.forEach { mistake ->
+              val selected = mistake.id == selectedMistakeId
+              Box(modifier = Modifier.fillMaxWidth().liquidGlassCard(shape = RoundedCornerShape(14.dp), borderBrush = if (selected) LiquidGlassBorderGold else LiquidGlassBorder).clickable { selectedMistakeId = mistake.id; reviewMode = true }.padding(14.dp)) {
+                Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                  Text("Stage " + (mistake.repetitionStage + 1) + " · " + mistake.timesReviewed + " reviews", color = if (selected) CoachAccentGold else TextMuted, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                  Text(mistake.pedagogicalExplanation, color = TextTitle, fontSize = 13.sp)
+                  Text("Played " + mistake.playedMoveUci + " · Best " + mistake.bestMoveUci, color = TextMuted, fontSize = 11.sp, fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace)
+                  if (selected) {
+                    Button(onClick = { onRetryPosition(mistake.fenBefore, Move.fromUci(mistake.bestMoveUci)) }, colors = ButtonDefaults.buttonColors(containerColor = CoachPrimary, contentColor = Color(0xFF0F1115))) {
+                      Icon(Icons.Default.Replay, null, modifier = Modifier.size(15.dp))
+                      Spacer(Modifier.width(5.dp))
+                      Text("Retry this position", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     } else if (currentSubTab == ReviewSubTab.PGN_REPLAY) {
       // PGN Input & Loader Box
       item {
