@@ -1448,7 +1448,21 @@ fun ReviewScreen(
                       coroutineScope.launch {
                         withContext(Dispatchers.IO) {
                           val nextStage = (record.repetitionStage + 1).coerceAtMost(4)
-                          dao.updateMistake(record.copy(repetitionStage = nextStage, timesSolvedSuccessfully = record.timesSolvedSuccessfully + 1))
+                          val intervalDays = when (nextStage) {
+                            1 -> 1L
+                            2 -> 3L
+                            3 -> 7L
+                            else -> 30L
+                          }
+                          val nextDue = System.currentTimeMillis() + intervalDays * 86_400_000L
+                          dao.updateMistake(
+                            record.copy(
+                              repetitionStage = nextStage,
+                              timesReviewed = record.timesReviewed + 1,
+                              timesSolvedSuccessfully = record.timesSolvedSuccessfully + 1,
+                              reviewDueTimestampMs = nextDue
+                            )
+                          )
                         }
                       }
                     } else {
@@ -1458,7 +1472,13 @@ fun ReviewScreen(
                       if (soundEnabled) soundEffects.playDefeat()
                       coroutineScope.launch {
                         withContext(Dispatchers.IO) {
-                          dao.updateMistake(record.copy(repetitionStage = 0))
+                          dao.updateMistake(
+                            record.copy(
+                              repetitionStage = 0,
+                              timesReviewed = record.timesReviewed + 1,
+                              reviewDueTimestampMs = System.currentTimeMillis() + 86_400_000L
+                            )
+                          )
                         }
                       }
                     }
