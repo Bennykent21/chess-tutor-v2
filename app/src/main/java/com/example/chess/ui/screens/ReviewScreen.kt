@@ -618,6 +618,13 @@ fun ReviewScreen(
               verticalAlignment = Alignment.CenterVertically
             ) {
               Column {
+                Text(
+                  text = "MOVE ${selectedChapter.moveNumber} INSPECTION",
+                  color = TextMuted,
+                  fontSize = 10.sp,
+                  fontWeight = FontWeight.Bold,
+                  letterSpacing = 1.sp
+                )
                 if (dueReviewCount > 0) {
             Box(
               modifier = Modifier
@@ -659,13 +666,6 @@ fun ReviewScreen(
             }
           }
 
-          Text(
-                  text = "MOVE ${selectedChapter.moveNumber} INSPECTION",
-                  color = TextMuted,
-                  fontSize = 10.sp,
-                  fontWeight = FontWeight.Bold,
-                  letterSpacing = 1.sp
-                )
                 Text(
                   text = selectedChapter.classification.badgeText,
                   color = when (selectedChapter.classification) {
