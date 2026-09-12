@@ -1509,7 +1509,7 @@ fun ReviewScreen(
 
                 Button(
                   onClick = {
-                    if (drillIndex < mistakeList.size - 1) {
+                    if (drillIndex < dueMistakes.size - 1) {
                       drillIndex++
                       drillSelectedSquare = null
                       drillLegalTargets = emptySet()
@@ -1524,7 +1524,7 @@ fun ReviewScreen(
                   colors = ButtonDefaults.buttonColors(containerColor = CoachPrimary, contentColor = Color(0xFF0F1115))
                 ) {
                   Text(
-                    text = if (drillIndex < mistakeList.size - 1) "Next Mistake" else "Finish Drill",
+                    text = if (drillIndex < dueMistakes.size - 1) "Next Mistake" else "Finish Drill",
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold
                   )
@@ -1536,7 +1536,7 @@ fun ReviewScreen(
       }
 
       // Hero Drill Launcher Card (when drill is inactive)
-      if (!isDrillActive && mistakeList.isNotEmpty()) {
+      if (!isDrillActive && dueMistakes.isNotEmpty()) {
         item {
           Box(
             modifier = Modifier
@@ -1557,7 +1557,7 @@ fun ReviewScreen(
                   fontWeight = FontWeight.Bold
                 )
                 Text(
-                  text = "${mistakeList.size} positions due for practice. Strengthen tactical reflexes using Leitner intervals.",
+                  text = "${dueMistakes.size} positions due for practice. Strengthen tactical reflexes using Leitner intervals.",
                   color = TextBody,
                   fontSize = 11.5.sp,
                   lineHeight = 15.sp,
