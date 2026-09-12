@@ -1000,10 +1000,10 @@ fun FenPgnImportDialog(
                     chessComLoading = true
                     chessComError = null
                     coroutineScope.launch {
-                      val res = ChessComClient.fetchRecentGames(chessComUsername)
+                      val res = runCatching { ChessComService().fetchRecentGames(chessComUsername) }
                       chessComLoading = false
                       res.onSuccess { games ->
-                        chessComGames = games
+                        chessComGames = games.map { game -> ChessComGameItem(url = game.url ?: "", pgn = game.pgn ?: "", time_class = game.timeClass ?: "game", end_time = game.endTime ?: 0L, white = game.white?.let { ChessComGameItem.Player(it.username ?: "?", it.rating ?: 0, it.result ?: "") }, black = game.black?.let { ChessComGameItem.Player(it.username ?: "?", it.rating ?: 0, it.result ?: "") }) }
                         if (games.isEmpty()) {
                           chessComError = "No games found in recent archives for '$chessComUsername'"
                         }
