@@ -151,6 +151,7 @@ fun ReviewScreen(
   val dao = remember { ChessDatabaseProvider.getDatabase(context).chessDao() }
   val activeMistakesFlow = remember { dao.getActiveMistakes() }
   val mistakeList by activeMistakesFlow.collectAsState(initial = emptyList())
+  val dueReviewCount = mistakeList.count { it.reviewDueTimestampMs <= System.currentTimeMillis() }
 
   var currentSubTab by remember { mutableStateOf(ReviewSubTab.GAME_STORY) }
   var chessComUsername by remember { mutableStateOf("") }
