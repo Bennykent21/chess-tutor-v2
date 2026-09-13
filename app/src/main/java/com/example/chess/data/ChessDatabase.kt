@@ -14,6 +14,9 @@ interface ChessDao {
   @Query("SELECT * FROM mistake_book WHERE repetitionStage < 4 ORDER BY reviewDueTimestampMs ASC")
   fun getActiveMistakes(): Flow<List<MistakeRecord>>
 
+  @Query("SELECT COUNT(*) FROM mistake_book WHERE repetitionStage < 4 AND reviewDueTimestampMs <= :nowMs")
+  fun observeDueMistakeCount(nowMs: Long): Flow<Int>
+
   @Query("SELECT * FROM mistake_book WHERE reviewDueTimestampMs <= :nowMs AND repetitionStage < 4 LIMIT 10")
   suspend fun getDueMistakes(nowMs: Long): List<MistakeRecord>
 
