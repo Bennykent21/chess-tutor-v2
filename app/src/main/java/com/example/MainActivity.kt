@@ -123,7 +123,7 @@ fun ChessTutorApp() {
           onLoadPgnForReview = { pgn ->
             currentTab = ChessAppTab.REVIEW
             coroutineScope.launch {
-              snackbarHostState.showSnackbar("Game loaded for engine analysis!")
+              snackbarHostState.showSnackbar("Game loaded for review.")
             }
           }
         )
