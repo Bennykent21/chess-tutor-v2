@@ -77,6 +77,7 @@ fun ChessTutorApp() {
   val dao = remember { ChessDatabaseProvider.getDatabase(context).chessDao() }
   val activeMistakesFlow = remember { dao.getActiveMistakes() }
   val dueMistakes by activeMistakesFlow.collectAsState(initial = emptyList())
+  val dueReviewCount by dao.observeDueMistakeCount(System.currentTimeMillis()).collectAsState(initial = 0)
 
   val userProgressFlow = remember { dao.getUserProgressFlow() }
   val userProgress by userProgressFlow.collectAsState(initial = null)
@@ -215,6 +216,7 @@ fun ChessTutorApp() {
               userTacticsRating = userProgress?.tacticsRating ?: 1100,
               puzzlesSolvedCount = userProgress?.puzzlesSolved ?: 0,
               dueMistakes = dueMistakes,
+              dueReviewCount = dueReviewCount,
               activeLesson = activeCurriculumLesson,
               onStartPlacementAssessment = {
                 currentDestination = MainNavigationDestination.PLACEMENT_ASSESSMENT
