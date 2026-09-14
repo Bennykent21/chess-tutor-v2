@@ -181,7 +181,7 @@ fun FenPgnImportDialog(
   onDismiss: () -> Unit,
   onPlayFenInArena: (fen: String, title: String) -> Unit,
   onAddTacticsPuzzle: ((puzzle: TacticalPuzzle) -> Unit)? = null,
-  onLoadPgnForReview: ((pgn: String) -> Unit)? = null,
+  onLoadPgnForReview: ((pgn: String, playerSide: String) -> Unit)? = null,
   onImportToRepertoire: ((repertoire: RepertoireLine) -> Unit)? = null
 ) {
   val context = LocalContext.current
@@ -793,7 +793,7 @@ fun FenPgnImportDialog(
                       if (onLoadPgnForReview != null) {
                         OutlinedButton(
                           onClick = {
-                            onLoadPgnForReview(pgnText)
+                            onLoadPgnForReview(pgnText, pgnPlayerSide)
                             onDismiss()
                           },
                           shape = RoundedCornerShape(8.dp),
