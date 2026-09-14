@@ -212,6 +212,7 @@ fun ReviewScreen(
     """.trimIndent()
   }
   var pgnInputText by remember { mutableStateOf(samplePgn) }
+  var selectedPlayerSide by remember { mutableStateOf("Both") }
   var parsedGame by remember { mutableStateOf<ParsedPgnGame?>(PgnParser.parse(samplePgn)) }
   var currentMoveIndex by remember { mutableStateOf(parsedGame?.moves?.size?.minus(1)?.coerceAtLeast(0) ?: 0) }
 
@@ -1783,8 +1784,9 @@ fun ReviewScreen(
         showImportDialog = false
         if (soundEnabled) soundEffects.playVictory()
       },
-      onLoadPgnForReview = { pgn ->
+      onLoadPgnForReview = { pgn, playerSide ->
         pgnInputText = pgn
+        selectedPlayerSide = playerSide
         val parsed = PgnParser.parse(pgn)
         parsedGame = parsed
         currentMoveIndex = 0
