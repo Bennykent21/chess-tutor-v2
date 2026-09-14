@@ -26,6 +26,9 @@ interface ChessDao {
   @Update
   suspend fun updateMistake(mistake: MistakeRecord)
 
+  @Query("SELECT * FROM mistake_book WHERE id = :id LIMIT 1")
+  suspend fun getMistake(id: Long): MistakeRecord?
+
   @Query("SELECT * FROM user_progress WHERE id = :userId")
   fun getUserProgressFlow(userId: String = "default_user"): Flow<UserProgress?>
 
