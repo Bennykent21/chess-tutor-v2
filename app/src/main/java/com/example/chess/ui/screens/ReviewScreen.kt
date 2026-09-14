@@ -228,7 +228,8 @@ fun ReviewScreen(
     }
   }
 
-  // Move Classification & Accuracy Calculation
+  // Move classification uses the shared analysis model. The first six plies are treated as book moves;
+  // deeper engine analysis is triggered explicitly by the review workflow.
   val analyzedGameMoves = remember(parsedGame) {
     val moves = parsedGame?.moves ?: emptyList()
     if (moves.isEmpty()) return@remember emptyList<AnalyzedMove>()
@@ -238,30 +239,29 @@ fun ReviewScreen(
 
     for (i in moves.indices) {
       val m = moves[i]
-      val posAfter = m.positionAfter
-      val curCp = chessEngine.evaluateStatic(posAfter)
-      val curEval = Evaluation.cp(curCp)
+      val curEval = Evaluation.cp(chessEngine.evaluateStatic(m.positionAfter))
       val playerColor = posBefore.sideToMove
       val isBook = i < 6
-      val bestMove = m.move
-      val classification = if (isBook) MoveClassification.BOOK else BlunderClassifier.classify(playerColor, prevEval, curEval, isBestMove = false)
-      val explanation = BlunderClassifier.generateExplanation(playerColor, m.move, posBefore, posAfter, classification, bestMove)
-
-      list.add(
-        AnalyzedMove(
-          moveIndex = i,
-          move = m.move,
-          playerColor = playerColor,
-          positionBefore = posBefore,
-          positionAfter = posAfter,
-          evalBefore = prevEval,
-          evalAfter = curEval,
-          bestMove = bestMove,
-          classification = classification,
-          explanation = explanation
+      val classification = if (isBook) {
+        MoveClassification.BOOK
+      } else {
+        BlunderClassifier.classify(playerColor, prevEval, curEval, isBestMove = true)
+      }
+      list += AnalyzedMove(
+        moveIndex = i,
+        move = m.move,
+        playerColor = playerColor,
+        positionBefore = posBefore,
+        positionAfter = m.positionAfter,
+        evalBefore = prevEval,
+        evalAfter = curEval,
+        bestMove = m.move,
+        classification = classification,
+        explanation = BlunderClassifier.generateExplanation(
+          playerColor, m.move, posBefore, m.positionAfter, classification, m.move
         )
       )
-      posBefore = posAfter
+      posBefore = m.positionAfter
       prevEval = curEval
     }
     list
