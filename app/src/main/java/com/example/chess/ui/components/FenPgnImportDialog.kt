@@ -202,10 +202,14 @@ fun FenPgnImportDialog(
 
   // PGN State
   var pgnText by remember { mutableStateOf(PGN_PRESETS[0].pgn) }
+  var pgnPlayerSide by remember { mutableStateOf("Both") }
   val parsedPgnGame = remember(pgnText) { runCatching { PgnParser.parse(pgnText) }.getOrNull() }
   var selectedPgnPly by remember(parsedPgnGame) {
     mutableIntStateOf(parsedPgnGame?.moves?.lastIndex?.coerceAtLeast(0) ?: 0)
   }
+
+  // Controls which side's mistakes are treated as the learner's mistakes.
+  // Kept at import level so analysis never has to guess player identity.
 
   // Lichess State
   var lichessStudyInput by remember { mutableStateOf("") }
