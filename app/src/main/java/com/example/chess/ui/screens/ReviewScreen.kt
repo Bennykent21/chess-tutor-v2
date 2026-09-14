@@ -81,6 +81,7 @@ import com.example.chess.core.Position
 import com.example.chess.core.Square
 import com.example.chess.data.ChessDatabaseProvider
 import com.example.chess.data.MistakeRecord
+import com.example.chess.data.MistakeReviewService
 import com.example.chess.network.ChessComClient
 import com.example.chess.network.ChessComGameItem
 import com.example.chess.engine.Evaluation
@@ -149,6 +150,7 @@ fun ReviewScreen(
   var showImportDialog by remember { mutableStateOf(false) }
 
   val dao = remember { ChessDatabaseProvider.getDatabase(context).chessDao() }
+  val mistakeReviewService = remember { MistakeReviewService(dao) }
   val activeMistakesFlow = remember { dao.getActiveMistakes() }
   val mistakeList by activeMistakesFlow.collectAsState(initial = emptyList())
   val dueReviewCount = mistakeList.count { it.reviewDueTimestampMs <= System.currentTimeMillis() }
@@ -333,6 +335,12 @@ fun ReviewScreen(
   var drillLegalTargets by remember { mutableStateOf<Set<Square>>(emptySet()) }
   var drillSuccess by remember { mutableStateOf<Boolean?>(null) }
   var drillFeedbackText by remember { mutableStateOf<String?>(null) }
+
+  fun submitMistakeReview(id: Long, solved: Boolean) {
+    coroutineScope.launch(Dispatchers.IO) {
+      mistakeReviewService.recordResult(id, solved)
+    }
+  }
 
   // Fast centipawn evaluation curve across all parsed game moves
   val gameEvalPoints = remember(parsedGame) {
