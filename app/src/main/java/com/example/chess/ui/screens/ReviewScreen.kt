@@ -339,7 +339,19 @@ fun ReviewScreen(
   fun submitMistakeReview(id: Long, solved: Boolean) {
     coroutineScope.launch(Dispatchers.IO) {
       mistakeReviewService.recordResult(id, solved)
+      withContext(Dispatchers.Main) {
+        drillSuccess = solved
+        drillFeedbackText = if (solved) "Correct. Next review scheduled." else "Not quite. This position will return sooner."
+      }
     }
+  }
+
+  fun beginNextMistake() {
+    val next = dueMistakes.getOrNull(drillIndex)
+    selectedMistakeId = next?.id
+    drillSuccess = null
+    drillFeedbackText = null
+    isDrillActive = next != null
   }
 
   // Fast centipawn evaluation curve across all parsed game moves
