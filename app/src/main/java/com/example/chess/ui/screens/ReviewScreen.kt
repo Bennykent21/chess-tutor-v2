@@ -289,6 +289,27 @@ fun ReviewScreen(
     }
 
     analyzedGameMoves = results
+
+    // Persist only the user's significant mistakes. For imported games without an
+    // explicit player identity, persist both sides rather than silently assigning
+    // the wrong side to the user.
+    withContext(Dispatchers.IO) {
+      results.asSequence()
+        .filter { it.classification == MoveClassification.MISTAKE || it.classification == MoveClassification.BLUNDER }
+        .forEach { analyzed ->
+          dao.insertMistake(
+            MistakeRecord(
+              fenBefore = analyzed.positionBefore.toFen(),
+              playedMoveUci = analyzed.move.uci,
+              bestMoveUci = analyzed.bestMove.uci,
+              evalDeltaPawns = (analyzed.evalBefore.scoreForSide(analyzed.playerColor) -
+                analyzed.evalAfter.scoreForSide(analyzed.playerColor)).coerceAtLeast(0f),
+              pedagogicalExplanation = analyzed.explanation,
+              reviewDueTimestampMs = System.currentTimeMillis()
+            )
+          )
+        }
+    }
     isAnalyzingGame = false
   }
 
