@@ -228,43 +228,68 @@ fun ReviewScreen(
     }
   }
 
-  // Move classification uses the shared analysis model. The first six plies are treated as book moves;
-  // deeper engine analysis is triggered explicitly by the review workflow.
-  val analyzedGameMoves = remember(parsedGame) {
-    val moves = parsedGame?.moves ?: emptyList()
-    if (moves.isEmpty()) return@remember emptyList<AnalyzedMove>()
-    val list = mutableListOf<AnalyzedMove>()
-    var posBefore = Position.fromFen(Position.STARTING_FEN)
-    var prevEval = Evaluation.cp(chessEngine.evaluateStatic(posBefore))
+  // Engine-backed review analysis. Runs off the Compose thread and updates the UI when complete.
+  var analyzedGameMoves by remember { mutableStateOf<List<AnalyzedMove>>(emptyList()) }
+  var isAnalyzingGame by remember { mutableStateOf(false) }
 
-    for (i in moves.indices) {
-      val m = moves[i]
-      val curEval = Evaluation.cp(chessEngine.evaluateStatic(m.positionAfter))
-      val playerColor = posBefore.sideToMove
-      val isBook = i < 6
-      val classification = if (isBook) {
-        MoveClassification.BOOK
-      } else {
-        BlunderClassifier.classify(playerColor, prevEval, curEval, isBestMove = true)
-      }
-      list += AnalyzedMove(
-        moveIndex = i,
-        move = m.move,
-        playerColor = playerColor,
-        positionBefore = posBefore,
-        positionAfter = m.positionAfter,
-        evalBefore = prevEval,
-        evalAfter = curEval,
-        bestMove = m.move,
-        classification = classification,
-        explanation = BlunderClassifier.generateExplanation(
-          playerColor, m.move, posBefore, m.positionAfter, classification, m.move
-        )
-      )
-      posBefore = m.positionAfter
-      prevEval = curEval
+  LaunchedEffect(parsedGame) {
+    val moves = parsedGame?.moves.orEmpty()
+    if (moves.isEmpty()) {
+      analyzedGameMoves = emptyList()
+      return@LaunchedEffect
     }
-    list
+
+    isAnalyzingGame = true
+    analyzedGameMoves = emptyList()
+
+    val results = withContext(Dispatchers.Default) {
+      val list = mutableListOf<AnalyzedMove>()
+      var posBefore = Position.fromFen(Position.STARTING_FEN)
+      var prevEval = chessEngine.evaluatePosition(posBefore, depth = 3)
+
+      for ((index, parsedMove) in moves.withIndex()) {
+        val playerColor = posBefore.sideToMove
+        val bestMove = chessEngine.findBestMove(posBefore, depth = 3)
+        val after = parsedMove.positionAfter
+        val afterEval = chessEngine.evaluatePosition(after, depth = 3)
+        val isBook = index < 6
+        val classification = if (isBook) {
+          MoveClassification.BOOK
+        } else {
+          BlunderClassifier.classify(
+            playerColor,
+            prevEval,
+            afterEval,
+            isBestMove = bestMove.uci == parsedMove.move.uci
+          )
+        }
+        list += AnalyzedMove(
+          moveIndex = index,
+          move = parsedMove.move,
+          playerColor = playerColor,
+          positionBefore = posBefore,
+          positionAfter = after,
+          evalBefore = prevEval,
+          evalAfter = afterEval,
+          bestMove = bestMove,
+          classification = classification,
+          explanation = BlunderClassifier.generateExplanation(
+            playerColor,
+            parsedMove.move,
+            posBefore,
+            after,
+            classification,
+            bestMove
+          )
+        )
+        posBefore = after
+        prevEval = afterEval
+      }
+      list
+    }
+
+    analyzedGameMoves = results
+    isAnalyzingGame = false
   }
 
   val whiteAccuracy = remember(analyzedGameMoves) {
