@@ -296,7 +296,12 @@ fun ReviewScreen(
     // the wrong side to the user.
     withContext(Dispatchers.IO) {
       results.asSequence()
-        .filter { it.classification == MoveClassification.MISTAKE || it.classification == MoveClassification.BLUNDER }
+        .filter {
+          (selectedPlayerSide == "Both" ||
+            (selectedPlayerSide == "White" && it.playerColor == PieceColor.WHITE) ||
+            (selectedPlayerSide == "Black" && it.playerColor == PieceColor.BLACK)) &&
+            (it.classification == MoveClassification.MISTAKE || it.classification == MoveClassification.BLUNDER)
+        }
         .forEach { analyzed ->
           dao.insertMistake(
             MistakeRecord(
