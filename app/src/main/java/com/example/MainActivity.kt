@@ -42,6 +42,7 @@ import com.example.chess.ui.screens.AssessmentScreen
 import com.example.chess.ui.screens.CoachHomeScreen
 import com.example.chess.ui.screens.CurriculumScreen
 import com.example.chess.ui.screens.RepertoireScreen
+import com.example.chess.ui.screens.StudyBoardScreen
 import com.example.chess.ui.screens.ReviewScreen
 import com.example.chess.ui.screens.TacticsDojoScreen
 import com.example.chess.ui.theme.CanvasBackground
@@ -76,6 +77,7 @@ fun ChessTutorApp() {
   val dao = remember { ChessDatabaseProvider.getDatabase(context).chessDao() }
   val activeMistakesFlow = remember { dao.getActiveMistakes() }
   val dueMistakes by activeMistakesFlow.collectAsState(initial = emptyList())
+  val dueReviewCount by dao.observeDueMistakeCount(System.currentTimeMillis()).collectAsState(initial = 0)
 
   val userProgressFlow = remember { dao.getUserProgressFlow() }
   val userProgress by userProgressFlow.collectAsState(initial = null)
@@ -86,6 +88,7 @@ fun ChessTutorApp() {
   var arenaStartingFen by remember { mutableStateOf(Position.STARTING_FEN) }
   var arenaSelectedLevel by remember { mutableStateOf(TrainingLevel.INTERMEDIATE_1200) }
   var showImportModal by remember { mutableStateOf(false) }
+  var studyLineId by remember { mutableStateOf<String?>(null) }
 
   val activeCurriculumLesson = remember { CurriculumRepository.allLessons.first() }
 
@@ -120,7 +123,7 @@ fun ChessTutorApp() {
           onLoadPgnForReview = { pgn ->
             currentTab = ChessAppTab.REVIEW
             coroutineScope.launch {
-              snackbarHostState.showSnackbar("Game loaded for engine analysis!")
+              snackbarHostState.showSnackbar("Game loaded for review.")
             }
           }
         )
@@ -182,6 +185,25 @@ fun ChessTutorApp() {
             currentDestination = MainNavigationDestination.TABS
           }
         )
+      } else if (studyLineId != null) {
+        val studyLine = RepertoireRepository.getRepertoireById(studyLineId!!)
+        if (studyLine == null) {
+          studyLineId = null
+        } else {
+          StudyBoardScreen(
+            line = studyLine,
+            onBack = { studyLineId = null },
+            onPracticeInArena = { fen, title ->
+              arenaStartingFen = fen
+              arenaSelectedLevel = TrainingLevel.INTERMEDIATE_1200
+              studyLineId = null
+              currentTab = ChessAppTab.ARENA
+              coroutineScope.launch {
+                snackbarHostState.showSnackbar("Study position loaded: $title")
+              }
+            }
+          )
+        }
       } else {
         AnimatedContent(
           targetState = currentTab,
@@ -194,6 +216,7 @@ fun ChessTutorApp() {
               userTacticsRating = userProgress?.tacticsRating ?: 1100,
               puzzlesSolvedCount = userProgress?.puzzlesSolved ?: 0,
               dueMistakes = dueMistakes,
+              dueReviewCount = dueReviewCount,
               activeLesson = activeCurriculumLesson,
               onStartPlacementAssessment = {
                 currentDestination = MainNavigationDestination.PLACEMENT_ASSESSMENT
@@ -204,7 +227,10 @@ fun ChessTutorApp() {
               onStartSpacedReview = {
                 currentTab = ChessAppTab.REVIEW
                 coroutineScope.launch {
-                  snackbarHostState.showSnackbar("Loaded Spaced-Repetition Review Queue")
+                  snackbarHostState.showSnackbar(
+                    if (dueMistakes.isEmpty()) "No positions are due for review"
+                    else "Loaded " + dueMistakes.size + " spaced-repetition positions"
+                  )
                 }
               },
               onResumeLesson = {
@@ -217,6 +243,34 @@ fun ChessTutorApp() {
                 coroutineScope.launch {
                   snackbarHostState.showSnackbar("Sparring loaded: ${level.title}")
                 }
+              }
+            )
+
+            ChessAppTab.TACTICS -> TacticsDojoScreen(
+              userTacticsRating = userProgress?.tacticsRating ?: 1100,
+              puzzlesSolvedCount = userProgress?.puzzlesSolved ?: 0,
+              onPuzzleSolved = { newRating, solvedCount ->
+                coroutineScope.launch {
+                  withContext(Dispatchers.IO) {
+                    dao.upsertUserProgress(
+                      (userProgress ?: UserProgress()).copy(
+                        tacticsRating = newRating,
+                        puzzlesSolved = solvedCount
+                      )
+                    )
+                  }
+                }
+              },
+              onPracticeInArena = { fen, title ->
+                arenaStartingFen = fen
+                arenaSelectedLevel = TrainingLevel.INTERMEDIATE_1200
+                currentTab = ChessAppTab.ARENA
+                coroutineScope.launch {
+                  snackbarHostState.showSnackbar("Tactical Sparring: $title")
+                }
+              },
+              onClose = {
+                currentTab = ChessAppTab.COACH
               }
             )
 
@@ -242,6 +296,9 @@ fun ChessTutorApp() {
               },
               onOpenImportModal = {
                 showImportModal = true
+              },
+              onOpenStudyBoard = { lineId ->
+                studyLineId = lineId
               }
             )
 
