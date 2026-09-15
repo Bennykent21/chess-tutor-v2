@@ -6,7 +6,6 @@ import com.example.chess.data.MistakeRecord
 import com.example.chess.engine.EngineClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlin.math.abs
 
 class GameAnalysisService(
   private val engine: EngineClient,
