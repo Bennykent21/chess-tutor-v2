@@ -1527,14 +1527,7 @@ fun ReviewScreen(
                             else -> 30L
                           }
                           val nextDue = System.currentTimeMillis() + intervalDays * 86_400_000L
-                          dao.updateMistake(
-                            record.copy(
-                              repetitionStage = nextStage,
-                              timesReviewed = record.timesReviewed + 1,
-                              timesSolvedSuccessfully = record.timesSolvedSuccessfully + 1,
-                              reviewDueTimestampMs = nextDue
-                            )
-                          )
+                          mistakeReviewService.recordResult(record.id, solved = true)
                         }
                       }
                     } else {
