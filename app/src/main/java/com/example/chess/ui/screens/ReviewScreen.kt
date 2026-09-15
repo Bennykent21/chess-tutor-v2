@@ -305,17 +305,22 @@ fun ReviewScreen(
             (it.classification == MoveClassification.MISTAKE || it.classification == MoveClassification.BLUNDER)
         }
         .forEach { analyzed ->
-          dao.insertMistake(
-            MistakeRecord(
-              fenBefore = analyzed.positionBefore.toFen(),
-              playedMoveUci = analyzed.move.uci,
-              bestMoveUci = analyzed.bestMove.uci,
-              evalDeltaPawns = (analyzed.evalBefore.scoreForSide(analyzed.playerColor) -
-                analyzed.evalAfter.scoreForSide(analyzed.playerColor)).coerceAtLeast(0f),
-              pedagogicalExplanation = analyzed.explanation,
-              reviewDueTimestampMs = System.currentTimeMillis()
+          val fenBefore = analyzed.positionBefore.toFen()
+          val playedMoveUci = analyzed.move.uci
+          val bestMoveUci = analyzed.bestMove.uci
+          if (dao.findMistakeId(fenBefore, playedMoveUci, bestMoveUci) == null) {
+            dao.insertMistake(
+              MistakeRecord(
+                fenBefore = fenBefore,
+                playedMoveUci = playedMoveUci,
+                bestMoveUci = bestMoveUci,
+                evalDeltaPawns = (analyzed.evalBefore.scoreForSide(analyzed.playerColor) -
+                  analyzed.evalAfter.scoreForSide(analyzed.playerColor)).coerceAtLeast(0f),
+                pedagogicalExplanation = analyzed.explanation,
+                reviewDueTimestampMs = System.currentTimeMillis()
+              )
             )
-          )
+          }
         }
     }
     isAnalyzingGame = false
