@@ -53,16 +53,21 @@ class GameAnalysisService(
 
       if (classification == MoveClassification.MISTAKE || classification == MoveClassification.BLUNDER) {
         val loss = (evalBefore.scoreForSide(playerColor) - evalAfter.scoreForSide(playerColor)).coerceAtLeast(0f)
-        dao.insertMistake(
-          MistakeRecord(
-            fenBefore = before.toFen(),
-            playedMoveUci = parsed.move.uci,
-            bestMoveUci = best.uci,
-            evalDeltaPawns = loss,
-            pedagogicalExplanation = explanation,
-            reviewDueTimestampMs = System.currentTimeMillis()
+        val fenBefore = before.toFen()
+        val playedMoveUci = parsed.move.uci
+        val bestMoveUci = best.uci
+        if (dao.findMistakeId(fenBefore, playedMoveUci, bestMoveUci) == null) {
+          dao.insertMistake(
+            MistakeRecord(
+              fenBefore = fenBefore,
+              playedMoveUci = playedMoveUci,
+              bestMoveUci = bestMoveUci,
+              evalDeltaPawns = loss,
+              pedagogicalExplanation = explanation,
+              reviewDueTimestampMs = System.currentTimeMillis()
+            )
           )
-        )
+        }
       }
     }
     analyzed
