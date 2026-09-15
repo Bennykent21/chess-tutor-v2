@@ -23,6 +23,9 @@ interface ChessDao {
   @Insert(onConflict = OnConflictStrategy.REPLACE)
   suspend fun insertMistake(mistake: MistakeRecord): Long
 
+  @Query("SELECT id FROM mistake_book WHERE fenBefore = :fenBefore AND playedMoveUci = :playedMoveUci AND bestMoveUci = :bestMoveUci LIMIT 1")
+  suspend fun findMistakeId(fenBefore: String, playedMoveUci: String, bestMoveUci: String): Long?
+
   @Update
   suspend fun updateMistake(mistake: MistakeRecord)
 
